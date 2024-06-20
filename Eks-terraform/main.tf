@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "assume_role" {
 
 # Create the IAM role for the EKS cluster
 resource "aws_iam_role" "example" {
-  name               = "eks-cluster-cloud-new"
+  name               = "eks-cluster-cloud-1"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
 }
 
@@ -29,11 +29,16 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Get the public subnets in the default VPC
+# Get the public subnets in the default VPC and filter by supported availability zones
 data "aws_subnets" "public" {
   filter {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1f"]
   }
 }
 
@@ -55,7 +60,7 @@ resource "aws_eks_cluster" "example" {
 
 # Create the IAM role for the EKS node group
 resource "aws_iam_role" "example1" {
-  name = "eks-node-group-cloud-new"
+  name = "eks-node-group-cloud-1"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
