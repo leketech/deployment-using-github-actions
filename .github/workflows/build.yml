@@ -23,8 +23,8 @@ jobs:
       - name: Docker build and push
         run: |
           # Run commands to build and push Docker images
-          docker build -t swigg-clone .
-          docker tag swigg-clone leke1995/swigg-clone:latest
+          docker build -t swigg-new .
+          docker tag swigg-new leke1995/swigg-new:latest
           docker login -u ${{ secrets.Dockerhub_username }} -p ${{ secrets.Dockerhub_token }}
           docker push leke1995/swigg-new:latest
         env:
