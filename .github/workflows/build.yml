@@ -13,19 +13,26 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
       - name: NPM Install
         run: npm install
-        
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
       - name: Docker build and push
         run: |
-          # Run commands to build and push Docker images
-          docker build -t swigg-new-clone .
-          docker tag swigg-new-clone leke1995/swigg-new-clone:latest
-          echo ${{ secrets.Dockerhub_token }} | docker login -u ${{ secrets.Dockerhub_username }} --password-stdin
-          docker push leke1995/swigg-new-clone:latest
+          export DOCKER_BUILDKIT=1
+          docker buildx build --platform linux/amd64,linux/arm64 -t leke1995/swigg-new-clone:latest --push .
         env:
           DOCKER_CLI_ACI: 1
+          DOCKER_CLI_EXPERIMENTAL: enabled
+          DOCKER_BUILDKIT: 1
+          DOCKER_PASSWORD: ${{ secrets.Dockerhub_token }}
+          DOCKER_USERNAME: ${{ secrets.Dockerhub_username }}
