@@ -35,8 +35,8 @@ jobs:
         run: docker pull leke1995/swiggs:latest
       - name: Image scan
         run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
-     # - name: Deploy to container
-     #   run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
+      - name: Deploy to container
+        run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
     # - name: Update kubeconfig
      #   run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
      # - name: Deploy to Kubernetes
