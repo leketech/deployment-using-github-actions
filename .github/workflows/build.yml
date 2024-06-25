@@ -1,10 +1,7 @@
-name: Build2
-
 on:
   push:
     branches:
       - main
-
 
 jobs:
   build:
@@ -20,8 +17,6 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
       - name: NPM Install
         run: npm install
-
-
       - name: Docker build and push
         run: |
           # Run commands to build and push Docker images
@@ -31,9 +26,18 @@ jobs:
           docker push leke1995/swiggs:latest
         env:
           DOCKER_CLI_ACI: 1
-      # If you wish to fail your job when the Quality Gate is red, uncomment the
-      # following lines. This would typically be used to fail a deployment.
-      # - uses: sonarsource/sonarqube-quality-gate-action@master
-      #   timeout-minutes: 5
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted]
+    steps:
+      - name: Docker pull image
+        run: docker pull leke1995/swiggs:latest
+      - name: Image scan
+        run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
+      - name: Deploy to container
+        run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
+      - name: Update kubeconfig
+        run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
+      - name: Deploy to Kubernetes
+        run: kubectl apply -f deployment-service.yml
