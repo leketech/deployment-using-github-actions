@@ -1,3 +1,5 @@
+name: Build and Deploy
+
 on:
   push:
     branches:
@@ -8,36 +10,42 @@ jobs:
     name: Build2
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - uses: sonarsource/sonarqube-scan-action@master
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis relevancy
+
+      - name: Run SonarQube scan
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      - name: NPM Install
+
+      - name: Install NPM dependencies
         run: npm install
-      - name: Docker build and push
+
+      - name: Build and push Docker image
         run: |
-          # Run commands to build and push Docker images
           docker build -t swiggs .
           docker tag swiggs leke1995/swiggs:latest
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
           docker push leke1995/swiggs:latest
-        env:
-          DOCKER_CLI_ACI: 1
 
   deploy:
     needs: build
-    runs-on: [self-hosted]
+    runs-on: self-hosted
     steps:
-      - name: Docker pull image
+      - name: Pull Docker image
         run: docker pull leke1995/swiggs:latest
-      - name: Image scan
+
+      - name: Scan Docker image
         run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
-      - name: Deploy to container
+
+      - name: Deploy Docker container
         run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
+
       - name: Update kubeconfig
         run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
+
       - name: Deploy to Kubernetes
-        run: kubectl apply -f deployment-service.yml2. commit the changes and this will deploy the image locally on the base server
+        run: kubectl apply -f deployment-service.yml
