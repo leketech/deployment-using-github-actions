@@ -14,7 +14,7 @@ spec:
         app: swiggs
     spec:
       containers:
-      - name: swigg
+      - name: swiggs
         image: leke1995/swiggs:latest
         ports:
         - containerPort: 3000   # Use port 3000
