@@ -1,51 +1,57 @@
-name: Build and Deploy
+name: Build
 
 on:
   push:
     branches:
       - main
 
+
 jobs:
   build:
-    name: Build2
+    name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v2
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for better analysis relevancy
-
-      - name: Run SonarQube scan
-        uses: sonarsource/sonarqube-scan-action@master
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      # If you wish to fail your job when the Quality Gate is red, uncomment the
+      # following lines. This would typically be used to fail a deployment.
+      # - uses: sonarsource/sonarqube-quality-gate-action@master
+      #   timeout-minutes: 5
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          
 
-      - name: Install NPM dependencies
-        run: npm install
+      # - name: Install NPM dependencies
+      #   run: npm install
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t swiggs .
-          docker tag swiggs leke1995/swiggs:latest
-          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          docker push leke1995/swiggs:latest
+      # - name: Build and push Docker image
+      #   run: |
+      #     docker build -t swiggs .
+      #     docker tag swiggs leke1995/swiggs:latest
+      #     echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      #     docker push leke1995/swiggs:latest
+ 
+# deploy:
+#    needs: build
+#     runs-on: self-hosted
+#     steps:
+#       - name: Pull Docker image
+#         run: docker pull leke1995/swiggs:latest
 
-  deploy:
-    needs: build
-    runs-on: self-hosted
-    steps:
-      - name: Pull Docker image
-        run: docker pull leke1995/swiggs:latest
+#       - name: Scan Docker image
+#         run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
 
-      - name: Scan Docker image
-        run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
+#       - name: Deploy Docker container
+#         run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
 
-      - name: Deploy Docker container
-        run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
+#       - name: Update kubeconfig
+#         run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
 
-      - name: Update kubeconfig
-        run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
-
-      - name: Deploy to Kubernetes
-        run: kubectl apply -f deployment-service.yml
+#       - name: Deploy to Kubernetes
+#         run: kubectl apply -f deployment-service.yml
+     
