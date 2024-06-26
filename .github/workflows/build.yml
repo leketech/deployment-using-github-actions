@@ -1,4 +1,4 @@
-name: Build
+name: Build3
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build3
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -24,33 +24,3 @@ jobs:
       #   timeout-minutes: 5
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          
-      #  - name: NPM Install
-      #   run: npm install
-
-      # - name: Build and push Docker image
-      #   run: |
-      #     docker build -t swiggs .
-      #     docker tag swiggs leke1995/swiggs:latest
-      #     echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-      #     docker push leke1995/swiggs:latest
- 
-# deploy:
-#    needs: build
-#     runs-on: self-hosted
-#     steps:
-#       - name: Pull Docker image
-#         run: docker pull leke1995/swiggs:latest
-
-#       - name: Scan Docker image
-#         run: trivy image leke1995/swiggs:latest > trivyimagedeploy.txt
-
-#       - name: Deploy Docker container
-#         run: docker run -d --name swiggs -p 3000:3000 leke1995/swiggs:latest
-
-#       - name: Update kubeconfig
-#         run: aws eks --region us-east-1 update-kubeconfig --name EKS_CLOUD
-
-#       - name: Deploy to Kubernetes
-#         run: kubectl apply -f deployment-service.yml
-     
