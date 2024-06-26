@@ -25,15 +25,15 @@ jobs:
       #   env:
       #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           
-      - name: Install NPM dependencies
-        run: npm install
+      #  - name: NPM Install
+      #   run: npm install
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t swiggs .
-          docker tag swiggs leke1995/swiggs:latest
-          echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
-          docker push leke1995/swiggs:latest
+      # - name: Build and push Docker image
+      #   run: |
+      #     docker build -t swiggs .
+      #     docker tag swiggs leke1995/swiggs:latest
+      #     echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      #     docker push leke1995/swiggs:latest
  
 # deploy:
 #    needs: build
