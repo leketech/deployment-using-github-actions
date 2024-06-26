@@ -18,6 +18,18 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: NPM Install
+        run: npm install
+        
+      - name: Docker build and push
+        run: |
+          # Run commands to build and push Docker images
+          docker build -t swiggs .
+          docker tag swiggs leke1995/swiggs:latest
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          docker push leke1995/swiggs:latest
+        env:
+          DOCKER_CLI_ACI: 1
       # If you wish to fail your job when the Quality Gate is red, uncomment the
       # following lines. This would typically be used to fail a deployment.
       # - uses: sonarsource/sonarqube-quality-gate-action@master
