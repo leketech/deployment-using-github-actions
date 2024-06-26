@@ -30,12 +30,63 @@ data "aws_vpc" "default" {
 }
 
 # Get the public subnets in the default VPC and filter by supported availability zones
-data "aws_subnet_ids" "public" {
-  vpc_id = data.aws_vpc.default.id
+data "aws_subnet" "public_a" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
 
   filter {
     name   = "availability-zone"
-    values = ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1f"]
+    values = ["us-east-1a"]
+  }
+}
+
+data "aws_subnet" "public_b" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1b"]
+  }
+}
+
+data "aws_subnet" "public_c" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1c"]
+  }
+}
+
+data "aws_subnet" "public_d" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1d"]
+  }
+}
+
+data "aws_subnet" "public_f" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+
+  filter {
+    name   = "availability-zone"
+    values = ["us-east-1f"]
   }
 }
 
@@ -45,7 +96,13 @@ resource "aws_eks_cluster" "example" {
   role_arn = aws_iam_role.example.arn
 
   vpc_config {
-    subnet_ids = data.aws_subnet_ids.public.ids
+    subnet_ids = [
+      data.aws_subnet.public_a.id,
+      data.aws_subnet.public_b.id,
+      data.aws_subnet.public_c.id,
+      data.aws_subnet.public_d.id,
+      data.aws_subnet.public_f.id
+    ]
   }
 
   # Ensure that IAM Role permissions are created before and deleted after EKS Cluster handling.
@@ -94,7 +151,13 @@ resource "aws_eks_node_group" "example" {
   cluster_name    = aws_eks_cluster.example.name
   node_group_name = "Node-cloud"
   node_role_arn   = aws_iam_role.example1.arn
-  subnet_ids      = data.aws_subnet_ids.public.ids
+  subnet_ids      = [
+    data.aws_subnet.public_a.id,
+    data.aws_subnet.public_b.id,
+    data.aws_subnet.public_c.id,
+    data.aws_subnet.public_d.id,
+    data.aws_subnet.public_f.id
+  ]
 
   scaling_config {
     desired_size = 1
